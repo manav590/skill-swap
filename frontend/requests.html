@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Incoming Requests</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="signup-container">
+    <h2>Incoming Skill Swap Requests</h2>
+    <div id="requestsList"></div>
+  </div>
+
+  <script>
+    async function fetchRequests() {
+      const toUserId = 1; // TEMP: hardcoded current user (replace later with logged-in user ID)
+
+      const response = await fetch(`http://localhost:3000/api/requests/${toUserId}`);
+      const requests = await response.json();
+
+      const container = document.getElementById('requestsList');
+      container.innerHTML = '';
+
+      if (requests.length === 0) {
+        container.innerHTML = '<p>No requests found.</p>';
+        return;
+      }
+
+      requests.forEach(req => {
+        const div = document.createElement('div');
+        div.classList.add('user-card');
+        div.innerHTML = `
+          <p><strong>From:</strong> ${req.from_user_name}</p>
+          <p><strong>Skill:</strong> ${req.skill_requested}</p>
+          <p><strong>Status:</strong> ${req.status}</p>
+          ${req.status === 'pending' ? `
+            <button onclick="respond(${req.id}, 'accepted')">Accept</button>
+            <button onclick="respond(${req.id}, 'rejected')">Reject</button>
+          ` : ''}
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function respond(requestId, action) {
+      const response = await fetch(`http://localhost:3000/api/requests/respond`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId, action })
+      });
+
+      const result = await response.json();
+      alert(result.message);
+      fetchRequests();
+    }
+
+    fetchRequests();
+  </script>
+</body>
+</html>

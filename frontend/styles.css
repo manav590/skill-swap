@@ -40,3 +40,11 @@ body {
 .signup-container button:hover {
   background: #218838;
 }
+
+.user-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+}
