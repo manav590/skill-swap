@@ -13,6 +13,8 @@
   </div>
 
   <script>
+    const currentUserId = 1;
+
     async function fetchUsers() {
       const response = await fetch('http://localhost:3000/api/users');
       const users = await response.json();
@@ -21,32 +23,40 @@
       listContainer.innerHTML = '';
 
       users.forEach(user => {
+        if (user.id === currentUserId) return;
+
         const div = document.createElement('div');
         div.classList.add('user-card');
+        const encodedSkill = encodeURIComponent(user.skills);
         div.innerHTML = `
           <h3>${user.name}</h3>
           <p><strong>Email:</strong> ${user.email}</p>
           <p><strong>Skills:</strong> ${user.skills}</p>
-          <button onclick="requestSkill(${user.id}, '${user.skills}')">Request Skill</button>
-
+          <button onclick="requestSkill(${user.id}, '${encodedSkill}')">Request Skill</button>
         `;
         listContainer.appendChild(div);
       });
     }
-    async function requestSkill(toUserId, skill) {
-        const fromUserId = 1; // TEMP: hardcoded user ID of logged-in user (we'll fix later)
 
-        const response = await fetch('http://localhost:3000/api/request', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fromUserId, toUserId, skillRequested: skill })
-        });
+    async function requestSkill(toUserId, skillEncoded) {
+      const skill = decodeURIComponent(skillEncoded);
 
-        const result = await response.json();
-        alert(result.message);
+      const response = await fetch('http://localhost:3000/api/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from_user_id: currentUserId,
+          to_user_id: toUserId,
+          skill_requested: skill
+        })
+      });
+
+      const data = await response.json();
+      alert(data.message);
     }
 
     fetchUsers();
   </script>
+
 </body>
 </html>

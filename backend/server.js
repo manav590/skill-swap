@@ -133,3 +133,17 @@ app.post('/api/requests/respond', (req, res) => {
     res.status(200).json({ message: `Request ${action}` });
   });
 });
+
+// Send a skill request
+app.post('/api/request', (req, res) => {
+  const { from_user_id, to_user_id, skill_requested } = req.body;
+
+  const sql = 'INSERT INTO requests (from_user_id, to_user_id, skill_requested) VALUES (?, ?, ?)';
+  db.query(sql, [from_user_id, to_user_id, skill_requested], (err, result) => {
+    if (err) {
+      console.error('❌ MySQL Error:', err.message);
+      return res.status(500).json({ message: 'Error sending request' });
+    }
+    res.status(200).json({ message: 'Skill request sent!' });
+  });
+});
